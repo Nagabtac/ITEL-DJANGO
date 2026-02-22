@@ -1,10 +1,49 @@
-<style>
-    p {
-        font-size: 20px;
-        color: blue;
-    }
-</style>
-<p>{{user.name}}</p>
-<p>{{user.age}}</p>
-<p>{{user.course}}</p>
-<p>{{user.motto}}</p>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+
+            /* Center content */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 320px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        p {
+            font-size: 20px;
+            color: #A14B28;
+            margin: 10px 0;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #2B1515;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <p><span class="label">Name:</span> {{ user.name }}</p>
+        <p><span class="label">Age:</span> {{ user.age }}</p>
+        <p><span class="label">Course:</span> {{ user.course }}</p>
+        <p><span class="label">Motto:</span> {{ user.motto }}</p>
+    </div>
+
+</body>
+</html>
