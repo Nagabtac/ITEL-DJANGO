@@ -1,0 +1,38 @@
+body {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    margin-top: 15px;
+}
+img{
+    align-items: center;
+}
+header{
+    background-color: #C084C6;
+    color: white;
+    padding: 10px 0;
+    border-radius: 8px;
+}
+.card {
+    background-color: #C282C2;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+#btn{
+    background-color: turquoise;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    color: black;
+}
+#btn:hover {
+    background-color: #F8D670;
+}
