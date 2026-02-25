@@ -2,7 +2,7 @@ const button = document.getElementById("btn");
 const image = document.getElementById("mainImage");
 
 let currentImage = 1;
-const totalImages = 6;
+const totalImages = 14;
 
 
 // button.addEventListener("mouseenter", function() {
