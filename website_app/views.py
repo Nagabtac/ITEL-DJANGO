@@ -1,12 +1,9 @@
 from django.shortcuts import render
 
 # Create your views here.
-def index(request):
-    user= {
-        "name": "Darwin",
-        "age": "19",
-        "course": "BSIT-II",
-        "motto": "no matter what happen remember to feel WEIIII"
-    }
-    
-    return render(request, 'index.html', {'user': user})
+from django.shortcuts import render
+from .models import Student
+
+def student_list(request):
+    students = Student.objects.all()
+    return render(request, 'students/student_list.html', {'students': students})
