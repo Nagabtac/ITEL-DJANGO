@@ -1,8 +1,10 @@
 from django.urls import path
-from . import views  # Import your views here
+from . import views
 
 urlpatterns = [
-    # Do NOT use include() here to point to this same file or the project file
-    path('', views.student_list, name='student_list'), 
-    # ... other paths ...
+    path('', views.student_list, name='student_list'),
+    path('addStudent', views.addStudent),
+    path('deleteStudent', views.deleteStudent),
+    path('updatePage', views.updatePage),
+    path('updateInfo', views.updateInfo),
 ]

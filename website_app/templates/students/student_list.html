@@ -1,28 +1,63 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="{% static 'website_app/css/student.css' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Directory</title>
+    <link rel="stylesheet" href="{% static 'css/student.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>Student Directory</h1>
+        <header>
+            <h1>Student Directory</h1>
+            <p>Manage and view enrolled students below.</p>
+        </header>
         
-        <div class="card">
+        <div class="card form-card">
+            <h3>Add New Student</h3>
+            <form action="addStudent" method="post" class="inline-form">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" name="name" placeholder="Full Name" required>
+                    <input type="text" name="course" placeholder="Course" required>
+                    <input type="text" name="motto" placeholder="Motto" required>
+                    <button type="submit" class="btn-primary">Add Student</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card table-card">
             <table>
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Course</th>
                         <th>Motto</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for student in students %}
                     <tr>
-                        <td><strong>{{ student.name }}</strong></td>
-                        <td><span class="course-badge">{{ student.course }}</span></td>
-                        <td class="motto-text">{{ student.motto }}</td>
+                        <td class="font-medium">{{ student.name }}</td>
+                        <td><span class="badge">{{ student.course }}</span></td>
+                        <td class="text-muted">"{{ student.motto }}"</td>
+                        <td>
+                            <div class="action-group">
+                                <form action="updatePage" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id" value="{{student.id}}">
+                                    <button type="submit" class="btn-outline">Update</button>
+                                </form>
+                                <form action="deleteStudent" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id" value="{{student.id}}">
+                                    <button type="submit" class="btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
