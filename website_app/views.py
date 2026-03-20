@@ -66,9 +66,14 @@ def updateInfo(request):
 
 # TODO API ENDPOINTS
 
-def add_cors_headers(response):
+def add_cors_headers(request, response):
     """Add CORS headers to response"""
-    response['Access-Control-Allow-Origin'] = '*'
+    # Must not be '*' when Allow-Credentials is enabled, otherwise browsers
+    # block credentialed requests (cookies/session). Echo the request origin
+    # for local dev.
+    origin = request.headers.get('Origin') if request else None
+    response['Access-Control-Allow-Origin'] = origin or 'http://localhost:3000'
+    response['Access-Control-Allow-Credentials'] = 'true'
     response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     return response
@@ -81,7 +86,7 @@ def register_api(request):
     """API endpoint for user registration"""
     if request.method == "OPTIONS":
         response = JsonResponse({})
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     if request.method == "POST":
         try:
@@ -93,16 +98,16 @@ def register_api(request):
             # Validation
             if not username or not password:
                 response = JsonResponse({'error': 'Username and password are required'}, status=400)
-                return add_cors_headers(response)
+                return add_cors_headers(request, response)
             
             if len(password) < 6:
                 response = JsonResponse({'error': 'Password must be at least 6 characters'}, status=400)
-                return add_cors_headers(response)
+                return add_cors_headers(request, response)
             
             # Check if user already exists
             if User.objects.filter(username=username).exists():
                 response = JsonResponse({'error': 'Username already exists'}, status=400)
-                return add_cors_headers(response)
+                return add_cors_headers(request, response)
             
             # Create user with hashed password
             user = User.objects.create_user(
@@ -116,14 +121,14 @@ def register_api(request):
                 'user_id': user.id,
                 'username': user.username
             }, status=201)
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
             
         except json.JSONDecodeError:
             response = JsonResponse({'error': 'Invalid JSON'}, status=400)
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
     
     response = JsonResponse({'error': 'Method not allowed'}, status=405)
-    return add_cors_headers(response)
+    return add_cors_headers(request, response)
 
 
 @csrf_exempt
@@ -131,7 +136,7 @@ def login_api(request):
     """API endpoint for user login"""
     if request.method == "OPTIONS":
         response = JsonResponse({})
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     if request.method == "POST":
         try:
@@ -141,7 +146,7 @@ def login_api(request):
             
             if not username or not password:
                 response = JsonResponse({'error': 'Username and password are required'}, status=400)
-                return add_cors_headers(response)
+                return add_cors_headers(request, response)
             
             # Authenticate user
             user = authenticate(request, username=username, password=password)
@@ -154,17 +159,17 @@ def login_api(request):
                     'username': user.username,
                     'email': user.email
                 })
-                return add_cors_headers(response)
+                return add_cors_headers(request, response)
             else:
                 response = JsonResponse({'error': 'Invalid username or password'}, status=401)
-                return add_cors_headers(response)
+                return add_cors_headers(request, response)
                 
         except json.JSONDecodeError:
             response = JsonResponse({'error': 'Invalid JSON'}, status=400)
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
     
     response = JsonResponse({'error': 'Method not allowed'}, status=405)
-    return add_cors_headers(response)
+    return add_cors_headers(request, response)
 
 
 @csrf_exempt
@@ -172,15 +177,15 @@ def logout_api(request):
     """API endpoint for user logout"""
     if request.method == "OPTIONS":
         response = JsonResponse({})
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     if request.method == "POST":
         logout(request)
         response = JsonResponse({'message': 'Logout successful'})
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     response = JsonResponse({'error': 'Method not allowed'}, status=405)
-    return add_cors_headers(response)
+    return add_cors_headers(request, response)
 
 
 @csrf_exempt
@@ -188,7 +193,7 @@ def user_profile_api(request):
     """API endpoint to get current user profile"""
     if request.method == "OPTIONS":
         response = JsonResponse({})
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     if request.method == "GET":
         if request.user.is_authenticated:
@@ -198,13 +203,13 @@ def user_profile_api(request):
                 'email': request.user.email,
                 'is_authenticated': True
             })
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
         else:
             response = JsonResponse({'is_authenticated': False}, status=401)
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
     
     response = JsonResponse({'error': 'Method not allowed'}, status=405)
-    return add_cors_headers(response)
+    return add_cors_headers(request, response)
 
 
 @csrf_exempt
@@ -212,12 +217,12 @@ def todo_api(request):
     """API endpoint for todos - GET all todos or POST new todo"""
     if request.method == "OPTIONS":
         response = JsonResponse({})
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     # Check if user is authenticated
     if not request.user.is_authenticated:
         response = JsonResponse({'error': 'Authentication required'}, status=401)
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     if request.method == "GET":
         todos = Todo.objects.filter(user=request.user)
@@ -232,7 +237,7 @@ def todo_api(request):
                 'updated_at': todo.updated_at.isoformat()
             })
         response = JsonResponse({'todos': todo_list})
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     elif request.method == "POST":
         try:
@@ -251,10 +256,10 @@ def todo_api(request):
                 'created_at': todo.created_at.isoformat(),
                 'updated_at': todo.updated_at.isoformat()
             }, status=201)
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
         except json.JSONDecodeError:
             response = JsonResponse({'error': 'Invalid JSON'}, status=400)
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
 
 
 @csrf_exempt
@@ -262,18 +267,18 @@ def todo_detail_api(request, todo_id):
     """API endpoint for individual todo - PUT to update or DELETE"""
     if request.method == "OPTIONS":
         response = JsonResponse({})
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     # Check if user is authenticated
     if not request.user.is_authenticated:
         response = JsonResponse({'error': 'Authentication required'}, status=401)
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     try:
         todo = Todo.objects.get(id=todo_id, user=request.user)
     except Todo.DoesNotExist:
         response = JsonResponse({'error': 'Todo not found'}, status=404)
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)
     
     if request.method == "PUT":
         try:
@@ -291,12 +296,12 @@ def todo_detail_api(request, todo_id):
                 'created_at': todo.created_at.isoformat(),
                 'updated_at': todo.updated_at.isoformat()
             })
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
         except json.JSONDecodeError:
             response = JsonResponse({'error': 'Invalid JSON'}, status=400)
-            return add_cors_headers(response)
+            return add_cors_headers(request, response)
     
     elif request.method == "DELETE":
         todo.delete()
         response = JsonResponse({'message': 'Todo deleted successfully'}, status=204)
-        return add_cors_headers(response)
+        return add_cors_headers(request, response)

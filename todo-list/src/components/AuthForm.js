@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './AuthForm.css';
 
+// Ensure Django session cookies are included for login requests.
+axios.defaults.withCredentials = true;
+
 const AuthForm = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -45,7 +48,11 @@ const AuthForm = ({ onAuthSuccess }) => {
         ? { username: formData.username, password: formData.password }
         : { username: formData.username, email: formData.email, password: formData.password };
 
-      const response = await axios.post(`http://localhost:8000${endpoint}`, data);
+      const response = await axios.post(
+        `http://localhost:8000${endpoint}`,
+        data,
+        { withCredentials: true }
+      );
       
       if (response.status === 200 || response.status === 201) {
         onAuthSuccess(response.data);
