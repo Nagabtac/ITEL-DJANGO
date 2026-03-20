@@ -8,7 +8,13 @@ urlpatterns = [
     path('updatePage', views.updatePage),
     path('updateInfo', views.updateInfo),
     
-    # Todo API endpoints only (React frontend)
+    # Authentication API endpoints
+    path('api/register/', views.register_api, name='register_api'),
+    path('api/login/', views.login_api, name='login_api'),
+    path('api/logout/', views.logout_api, name='logout_api'),
+    path('api/profile/', views.user_profile_api, name='user_profile_api'),
+    
+    # Todo API endpoints (require authentication)
     path('api/todos/', views.todo_api, name='todo_api'),
     path('api/todos/<int:todo_id>/', views.todo_detail_api, name='todo_detail_api'),
 ]

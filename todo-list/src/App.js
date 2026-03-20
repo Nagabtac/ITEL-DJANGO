@@ -3,6 +3,7 @@ import axios from 'axios';
 import './App.css';
 import TodoForm from './components/TodoForm';
 import TodoList from './components/TodoList';
+import AuthForm from './components/AuthForm';
 
 const API_BASE_URL = 'http://localhost:8000/api/todos/';
 
@@ -10,10 +11,50 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    loadTodos();
+    checkAuthStatus();
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadTodos();
+    }
+  }, [isAuthenticated]);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/profile/');
+      if (response.data.is_authenticated) {
+        setUser(response.data);
+        setIsAuthenticated(true);
+      }
+    } catch (err) {
+      setIsAuthenticated(false);
+    } finally {
+      setCheckingAuth(false);
+    }
+  };
+
+  const handleAuthSuccess = (userData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    setError('');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:8000/api/logout/');
+      setUser(null);
+      setIsAuthenticated(false);
+      setTodos([]);
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  };
 
   const loadTodos = async () => {
     setLoading(true);
@@ -22,7 +63,12 @@ function App() {
       const response = await axios.get(API_BASE_URL);
       setTodos(response.data.todos);
     } catch (err) {
-      setError('Failed to load todos: ' + err.message);
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+        setUser(null);
+      } else {
+        setError('Failed to load todos: ' + err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -34,7 +80,12 @@ function App() {
       setTodos([response.data, ...todos]);
       setError('');
     } catch (err) {
-      setError('Failed to add todo: ' + err.message);
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+        setUser(null);
+      } else {
+        setError('Failed to add todo: ' + err.message);
+      }
     }
   };
 
@@ -48,7 +99,12 @@ function App() {
       ));
       setError('');
     } catch (err) {
-      setError('Failed to update todo: ' + err.message);
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+        setUser(null);
+      } else {
+        setError('Failed to update todo: ' + err.message);
+      }
     }
   };
 
@@ -62,14 +118,39 @@ function App() {
       setTodos(todos.filter(todo => todo.id !== id));
       setError('');
     } catch (err) {
-      setError('Failed to delete todo: ' + err.message);
+      if (err.response?.status === 401) {
+        setIsAuthenticated(false);
+        setUser(null);
+      } else {
+        setError('Failed to delete todo: ' + err.message);
+      }
     }
   };
+
+  if (checkingAuth) {
+    return (
+      <div className="App">
+        <div className="loading">Checking authentication...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AuthForm onAuthSuccess={handleAuthSuccess} />;
+  }
 
   return (
     <div className="App">
       <div className="container">
-        <h1>Todo List</h1>
+        <div className="header">
+          <h1>Todo List</h1>
+          <div className="user-info">
+            <span>Welcome, {user?.username}!</span>
+            <button className="btn btn-secondary" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        </div>
         
         <TodoForm onAddTodo={addTodo} />
         
