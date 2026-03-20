@@ -1,0 +1,27 @@
+.todo-list h3 {
+  margin-bottom: 20px;
+  color: #495057;
+  font-size: 1.4rem;
+}
+
+.todos-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.empty-state h3 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  margin: 0;
+}
